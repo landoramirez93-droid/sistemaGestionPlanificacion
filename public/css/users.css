@@ -1,0 +1,133 @@
+/* =========================
+   VARIABLES GENERALES
+========================= */
+:root {
+    --primary: #0d6efd;
+    --secondary: #6c757d;
+    --success: #198754;
+    --danger: #dc3545;
+    --dark: #212529;
+    --light: #f8f9fa;
+}
+
+/* =========================
+   ESTILOS GENERALES
+========================= */
+body {
+    background-color: #f4f6f9;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 14px;
+    color: #212529;
+}
+
+h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #1a1919;
+}
+
+h2,
+h3 {
+    font-weight: 600;
+    color: #495057;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+.navbar {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+}
+
+/* =========================
+   BOTONES
+========================= */
+.btn {
+    border-radius: 6px;
+}
+
+.btn-sm {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+}
+
+/* =========================
+   TABLAS
+========================= */
+.table {
+    background-color: #ffffff;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.table thead th {
+    vertical-align: middle;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f1f3f5;
+}
+
+/* =========================
+   ALERTAS
+========================= */
+.alert {
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+/* =========================
+   FORMULARIOS
+========================= */
+.form-control {
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.form-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* =========================
+   TARJETAS (CARDS)
+========================= */
+.card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
+}
+
+.card-header {
+    background-color: #ffffff;
+    font-weight: 600;
+}
+
+/* =========================
+   UTILIDADES
+========================= */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.text-muted-small {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* =========================
+   FOOTER (OPCIONAL)
+========================= */
+footer {
+    margin-top: 40px;
+    padding: 15px;
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-align: center;
+}
