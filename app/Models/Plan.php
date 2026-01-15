@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\RegistraAuditoria;
+use Laravel\Boost\Concerns\ReadsLogs;
 
 class Plan extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, RegistraAuditoria;
      protected $table = 'planes';
 
     protected $fillable = [
@@ -23,6 +25,10 @@ class Plan extends Model
         'created_by',
         'updated_by',
     ];
+
+    // Config auditoría (si tu trait las usa)
+    protected array $auditExclude = ['password', 'remember_token'];
+    protected array $auditIgnore = ['updated_at', 'created_at', 'deleted_at'];
 
     protected $casts = [
         'fecha_inicio' => 'date',

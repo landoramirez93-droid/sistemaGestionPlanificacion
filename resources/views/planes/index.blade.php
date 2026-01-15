@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('styles')
+<link href="{{ asset('css/users.css') }}" rel="stylesheet">
+@endpush
+
 @section('title','Planes Institucionales')
 
 @section('content')
@@ -8,7 +12,7 @@
         <h4 class="mb-0">Planes Institucionales</h4>
         <small class="text-muted">Gestión de planes</small>
     </div>
-    <a href="{{ route('planes.create') }}" class="btn btn-primary">+ Nuevo Plan</a>
+    <a href="{{ route('planes.create') }}" class="btn btn-primary"> Nuevo Plan</a>
 </div>
 
 @if(session('success'))

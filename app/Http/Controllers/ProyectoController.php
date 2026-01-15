@@ -10,6 +10,7 @@ use App\Traits\RegistraAuditoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+
 class ProyectoController extends Controller
 {
     /**
@@ -120,4 +121,5 @@ class ProyectoController extends Controller
 
     return back()->with('success', 'Proyecto aprobado correctamente.');
     }
+
 }

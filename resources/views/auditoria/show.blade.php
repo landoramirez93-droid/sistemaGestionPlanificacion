@@ -49,16 +49,11 @@
                     <div class="fw-semibold">{{ $auditoria->descripcion ?? '-' }}</div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="text-muted small mb-1">Antes</div>
-                    <pre class="bg-light p-2 rounded mb-0"
-                        style="white-space: pre-wrap;">{{ json_encode($auditoria->antes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="text-muted small mb-1">Después</div>
-                    <pre class="bg-light p-2 rounded mb-0"
-                        style="white-space: pre-wrap;">{{ json_encode($auditoria->despues, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                <div class="col-12">
+                    <div class="text-muted small mb-2">Cambios (Antes vs Después)</div>
+                    <div class="border rounded">
+                        @include('auditoria.partials.diff-table', ['auditoria' => $auditoria])
+                    </div>
                 </div>
 
                 <div class="col-md-6">
@@ -76,13 +71,5 @@
             </div>
         </div>
     </div>
-
-    <form method="POST" action="{{ route('auditoria.destroy', $auditoria) }}"
-        onsubmit="return confirm('¿Eliminar este registro de auditoría?');">
-        @csrf
-        @method('DELETE')
-        <button class="btn btn-outline-danger">Eliminar</button>
-    </form>
-
 </div>
 @endsection

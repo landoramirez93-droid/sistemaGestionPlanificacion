@@ -1,5 +1,11 @@
 @extends('layouts.app')
 
+@push('styles')
+<link href="{{ asset('css/users.css') }}" rel="stylesheet">
+@endpush
+
+@section('title', 'Programas')
+
 @section('content')
 <div class="container">
 
@@ -8,7 +14,7 @@
             <h4 class="mb-0">Programas</h4>
             <small class="text-muted">Gestión de Programas </small>
         </div>
-        <a href="{{ route('programas.create') }}" class="btn btn-primary">+ Nuevo Programa</a>
+        <a href="{{ route('programas.create') }}" class="btn btn-primary"> Nuevo Programa</a>
     </div>
 
     @if(session('success'))

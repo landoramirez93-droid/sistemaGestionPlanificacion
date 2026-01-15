@@ -60,16 +60,16 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::resource('entidades', EntidadController::class)
-        ->only(['index', 'show'])
-        ->names('entidad')
-        ->parameters(['entidades' => 'entidad'])
-        ->middleware('role:Administrador,TI,Técnico de Planificación,Revisor Institucional,Validador (SNP / Ente Rector),Auditor');
-
-    Route::resource('entidades', EntidadController::class)
         ->except(['index', 'show'])
         ->names('entidad')
         ->parameters(['entidades' => 'entidad'])
         ->middleware('role:Administrador,TI');
+        
+    Route::resource('entidades', EntidadController::class)
+        ->only(['index', 'show'])
+        ->names('entidad')
+        ->parameters(['entidades' => 'entidad'])
+        ->middleware('role:Administrador,TI,Técnico de Planificación,Revisor Institucional,Validador (SNP / Ente Rector),Auditor');
 
     /*
     |--------------------------------------------------------------------------
@@ -77,17 +77,17 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     | Importante: el parámetro debe ser {meta} para que OdsMeta $meta funcione.
     */
+        // CRUD (solo Admin/TI)
+    Route::resource('ods-metas', OdsMetaController::class)
+        ->names('ods.metas')
+        ->except(['index', 'show'])
+        ->middleware('role:Administrador,TI');
+        
     // VER (internos)
     Route::resource('ods-metas', OdsMetaController::class)
         ->names('ods.metas')
         ->only(['index', 'show'])
         ->middleware('role:Administrador,TI,Técnico de Planificación,Revisor Institucional,Validador (SNP / Ente Rector),Auditor');
-
-    // CRUD (solo Admin/TI)
-    Route::resource('ods-metas', OdsMetaController::class)
-        ->names('ods.metas')
-        ->except(['index', 'show'])
-        ->middleware('role:Administrador,TI');
 
     /*
     |--------------------------------------------------------------------------

@@ -15,7 +15,7 @@ $selectedObjetivos = old('objetivo_ids', $meta?->objetivos?->pluck('id')->toArra
     </div>
 
     <div class="col-md-4">
-        <label class="form-label">Estado *</label>
+        <label class="form-label">Estado </label>
         <select class="form-select" name="estado" required>
             @foreach(['ACTIVA','INACTIVA'] as $st)
             <option value="{{ $st }}" {{ old('estado', $meta->estado ?? 'ACTIVA')===$st?'selected':'' }}>
@@ -26,7 +26,7 @@ $selectedObjetivos = old('objetivo_ids', $meta?->objetivos?->pluck('id')->toArra
     </div>
 
     <div class="col-12">
-        <label class="form-label">Descripción *</label>
+        <label class="form-label">Descripción </label>
         <textarea class="form-control" name="descripcion" rows="4"
             required>{{ old('descripcion', $meta->descripcion ?? '') }}</textarea>
     </div>

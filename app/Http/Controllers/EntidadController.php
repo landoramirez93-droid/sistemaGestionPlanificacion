@@ -60,13 +60,13 @@ class EntidadController extends Controller
         DB::transaction(function () use ($data) {
             $entidad = Entidad::create($data);
 
-            $this->registrarAuditoria(
+            /**$this->registrarAuditoria(
                 accion: 'CREAR',
                 modulo: 'Entidades',
                 tabla: 'entidades',
                 registroId: $entidad->id,
                 entidadId: $entidad->id
-            );
+             );*/
         });
 
         return redirect()

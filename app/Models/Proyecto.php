@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Traits\RegistraAuditoria;
 
 class Proyecto extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, RegistraAuditoria;
 
     protected $fillable = [
         'codigo',
@@ -26,6 +27,10 @@ class Proyecto extends Model
         'fecha_fin' => 'date',
         'presupuesto' => 'decimal:2',
     ];
+
+    // Configuración de auditoría (si tu trait las usa)
+    protected array $auditExclude = ['password', 'remember_token'];
+    protected array $auditIgnore  = ['updated_at', 'created_at', 'deleted_at'];
 
     public function programa(): BelongsTo
     {

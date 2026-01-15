@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\RegistraAuditoria;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PlanIndicador extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, RegistraAuditoria;
 
     protected $table = 'plan_indicadores';
 
@@ -22,6 +23,10 @@ class PlanIndicador extends Model
         'fuente',
         'estado',
     ];
+
+    // Config auditoría (si tu trait las usa)
+    protected array $auditExclude = ['password', 'remember_token'];
+    protected array $auditIgnore = ['updated_at', 'created_at', 'deleted_at'];
 
     public function plan()
     {

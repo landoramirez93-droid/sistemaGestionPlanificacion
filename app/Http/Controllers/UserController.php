@@ -7,6 +7,8 @@ use App\Models\Rol;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
+
+
 class UserController extends Controller
 {
     /**
@@ -109,4 +111,5 @@ class UserController extends Controller
             ->route('users.index')
             ->with('success', 'Usuario eliminado correctamente');
     }
+    
 }

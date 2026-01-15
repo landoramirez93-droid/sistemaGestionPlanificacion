@@ -1,5 +1,11 @@
 @extends('layouts.app')
 
+@push('styles')
+<link href="{{ asset('css/users.css') }}" rel="stylesheet">
+@endpush
+
+@section('title', 'Entidades')
+
 @section('content')
 <div class="container">
 
@@ -13,7 +19,7 @@
         </div>
 
         <a href="{{ route('entidad.create') }}" class="btn btn-primary">
-            + Nueva Entidad
+            Nueva Entidad
         </a>
     </div>
 
@@ -64,16 +70,16 @@
                             <td class="text-end">
                                 <div class="btn-group" role="group" aria-label="Acciones">
                                     <a href="{{ route('entidad.show', $entidad) }}"
-                                        class="btn btn-sm btn-outline-info">Ver</a>
+                                        class="btn btn-sm btn-outline-info">👁 Ver</a>
                                     <a href="{{ route('entidad.edit', $entidad) }}"
-                                        class="btn btn-sm btn-outline-warning">Editar</a>
+                                        class="btn btn-sm btn-outline-warning">✏ Editar</a>
 
                                     <form action="{{ route('entidad.destroy', $entidad) }}" method="POST"
                                         class="d-inline"
                                         onsubmit="return confirm('¿Eliminar esta entidad? Esta acción no se puede deshacer.')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">🗑 Eliminar</button>
                                     </form>
                                 </div>
                             </td>

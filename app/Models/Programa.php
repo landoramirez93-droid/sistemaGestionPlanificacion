@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Traits\RegistraAuditoria;
 
 class Programa extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, RegistraAuditoria;
 
     protected $table = 'programas';
 
@@ -28,6 +29,10 @@ class Programa extends Model
         'fecha_fin' => 'date',
         'estado' => 'boolean', 
     ];
+    
+    // Config auditoría (si tu trait las usa)
+    protected array $auditExclude = ['password', 'remember_token'];
+    protected array $auditIgnore  = ['updated_at', 'created_at', 'deleted_at'];
 
     public function responsable(): BelongsTo
     {
@@ -38,4 +43,5 @@ class Programa extends Model
     {
         return $this->hasMany(Proyecto::class, 'programa_id');
     }
+    
 }

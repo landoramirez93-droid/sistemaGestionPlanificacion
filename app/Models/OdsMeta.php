@@ -4,16 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\RegistraAuditoria;
+
 
 class OdsMeta extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, RegistraAuditoria;
 
     protected $table = 'ods_metas';
 
     protected $fillable = [
         'codigo','descripcion','anio_referencia','estado','created_by','updated_by'
     ];
+
+    // Config auditoría (si tu trait las usa)
+    protected array $auditExclude = ['password', 'remember_token'];
+    protected array $auditIgnore = ['updated_at', 'created_at', 'deleted_at'];
 
     public function objetivos()
     {

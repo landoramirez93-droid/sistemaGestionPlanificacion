@@ -1,6 +1,13 @@
 @extends('layouts.app')
 
+@push('styles')
+<link href="{{ asset('css/users.css') }}" rel="stylesheet">
+@endpush
+
+@section('title', 'Proyectos')
+
 @section('content')
+
 <div class="container">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -8,7 +15,7 @@
             <h4 class="mb-0">Proyectos</h4>
             <small class="text-muted">Total: {{ $proyectos->total() }}</small>
         </div>
-        <a href="{{ route('proyectos.create') }}" class="btn btn-primary">+ Nuevo Proyecto</a>
+        <a href="{{ route('proyectos.create') }}" class="btn btn-primary"> Nuevo Proyecto</a>
     </div>
 
     @if(session('success'))

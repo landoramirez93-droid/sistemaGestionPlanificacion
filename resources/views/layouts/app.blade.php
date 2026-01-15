@@ -24,13 +24,13 @@
         <aside class="sidebar bg-dark text-white d-flex flex-column p-3">
 
             <!-- Brand -->
-            <div class="d-flex align-items-center gap-2 mb-4">
+            <a href="{{ route('home') }}" class="text-white text-decoration-none d-flex align-items-center gap-2 mb-4">
                 <div class="brand-icon">📊</div>
                 <div class="lh-sm">
                     <div class="fw-semibold">Planificación</div>
                     <small class="text-secondary">SGP</small>
                 </div>
-            </div>
+            </a>
 
             <!-- Menu -->
             <nav class="sidebar-nav flex-grow-1">
@@ -166,7 +166,7 @@
             <!-- HEADER -->
             <nav class="navbar navbar-light bg-white shadow-sm px-4">
                 <span class="navbar-text fw-semibold">
-                    @yield('title', 'Dashboard')
+                    @yield('title', '')
                 </span>
 
                 <div class="d-flex align-items-center gap-2">

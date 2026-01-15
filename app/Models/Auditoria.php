@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
 class Auditoria extends Model
 {
     use HasFactory;
@@ -26,7 +27,7 @@ class Auditoria extends Model
         'ip',
         'user_agent',
     ];
-
+    
     protected $casts = [
         'antes' => 'array',
         'despues' => 'array',
@@ -34,7 +35,7 @@ class Auditoria extends Model
         'user_id' => 'integer',
         'entidad_id' => 'integer',
     ];
-
+    
     public function user()
     {
         return $this->belongsTo(User::class);

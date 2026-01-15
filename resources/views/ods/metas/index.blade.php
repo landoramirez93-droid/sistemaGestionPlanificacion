@@ -1,10 +1,15 @@
 @extends('layouts.app')
+
+@push('styles')
+<link href="{{ asset('css/users.css') }}" rel="stylesheet">
+@endpush
+
 @section('title','ODS - Metas')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Metas ODS</h4>
-    <a href="{{ route('ods.metas.create') }}">Nuevo</a>
+    <a href="{{ route('ods.metas.create') }}" class=" btn btn-primary">Nuevo</a>
 </div>
 
 @if(session('success'))

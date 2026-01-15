@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\RegistraAuditoria;
+
 
 class Entidad extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, RegistraAuditoria;
 
     protected $table = 'entidades';
 
@@ -18,6 +20,10 @@ class Entidad extends Model
         'nivel',
         'estado',
     ];
+
+    // Config auditoría (si tu trait las usa)
+    protected array $auditExclude = ['password', 'remember_token'];
+    protected array $auditIgnore = ['updated_at', 'created_at', 'deleted_at'];
 
     // Relación: una entidad tiene muchos objetivos
     public function objetivosEstrategicos()

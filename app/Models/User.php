@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Arr;
+use App\Traits\RegistraAuditoria;
+
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, RegistraAuditoria;
 
     /**
      * Atributos permitidos para asignación masiva (mass assignment).
@@ -24,6 +26,10 @@ class User extends Authenticatable
         'password',
         'rol_id',
     ];
+
+    // Config auditoría (si tu trait las usa)
+    protected array $auditExclude = ['password', 'remember_token'];
+    protected array $auditIgnore = ['updated_at', 'created_at', 'deleted_at'];
 
     /**
      * Relación: un usuario pertenece a un rol.
