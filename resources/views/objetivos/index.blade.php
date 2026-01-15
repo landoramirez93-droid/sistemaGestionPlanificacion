@@ -5,7 +5,6 @@
 
     <h4 class="mb-4">Gestión de Objetivos Estratégicos</h4>
 
-    {{-- Mensaje de éxito --}}
     @if(session('success'))
     <div class="alert alert-success">
         {{ session('success') }}
@@ -25,10 +24,10 @@
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
             <tr>
-                <th>Código</th>
+                <th>Nombre</th>
                 <th>Descripción</th>
+                <th>Línea Estratégica</th>
                 <th>Entidad Responsable</th>
-                <th>Horizonte</th>
                 <th>Estado</th>
                 <th width="160">Acciones</th>
             </tr>
@@ -36,10 +35,10 @@
         <tbody>
             @forelse($objetivos as $objetivo)
             <tr>
-                <td>{{ $objetivo->codigo }}</td>
+                <td>{{ $objetivo->nombre }}</td>
                 <td>{{ $objetivo->descripcion }}</td>
+                <td>{{ $objetivo->linea_estrategica }}</td>
                 <td>{{ $objetivo->entidad->nombre ?? 'No asignada' }}</td>
-                <td>{{ $objetivo->horizonte }}</td>
                 <td>
                     <span class="badge {{ $objetivo->estado ? 'bg-success' : 'bg-secondary' }}">
                         {{ $objetivo->estado ? 'Activo' : 'Inactivo' }}
