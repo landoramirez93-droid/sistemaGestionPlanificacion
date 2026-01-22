@@ -1,7 +1,7 @@
 @csrf
 
 <div class="mb-3">
-    <label class="form-label">Nombre *</label>
+    <label class="form-label">Nombre del Programa</label>
     <input type="text" name="nombre" class="form-control @error('nombre') is-invalid @enderror"
         value="{{ old('nombre', $programa->nombre ?? '') }}" required>
     @error('nombre') <div class="invalid-feedback">{{ $message }}</div> @enderror

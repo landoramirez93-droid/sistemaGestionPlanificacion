@@ -108,13 +108,7 @@ class EntidadController extends Controller
         DB::transaction(function () use ($entidad, $data) {
             $entidad->update($data);
 
-            $this->registrarAuditoria(
-                accion: 'ACTUALIZAR',
-                modulo: 'Entidades',
-                tabla: 'entidades',
-                registroId: $entidad->id,
-                entidadId: $entidad->id
-            );
+        
         });
 
         return redirect()
@@ -131,14 +125,7 @@ class EntidadController extends Controller
             $entidadId = $entidad->id;
 
             $entidad->delete();
-
-            $this->registrarAuditoria(
-                accion: 'ELIMINAR',
-                modulo: 'Entidades',
-                tabla: 'entidades',
-                registroId: $entidadId,
-                entidadId: $entidadId
-            );
+            
         });
 
         return redirect()

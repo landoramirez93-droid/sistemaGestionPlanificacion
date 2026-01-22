@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-md-8 mb-3">
-        <label class="form-label">Nombre *</label>
+        <label class="form-label">Nombre </label>
         <input type="text" name="nombre" class="form-control" value="{{ old('nombre', $entidad->nombre ?? '') }}"
             required>
     </div>

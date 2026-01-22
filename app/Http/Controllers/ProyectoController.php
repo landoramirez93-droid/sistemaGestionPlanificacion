@@ -6,10 +6,8 @@ use App\Models\Proyecto;
 use App\Models\Programa;
 use App\Http\Requests\StoreProyectoRequest;
 use App\Http\Requests\UpdateProyectoRequest;
-use App\Traits\RegistraAuditoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
 
 class ProyectoController extends Controller
 {
@@ -54,13 +52,31 @@ class ProyectoController extends Controller
      */
     public function store(StoreProyectoRequest $request)
     {
-        Proyecto::create($request->validated());
+    $data = $request->validated();
 
-        return redirect()
-            ->route('proyectos.index')
-            ->with('success', 'Proyecto creado correctamente.');
+    // Normaliza presupuesto
+    if (isset($data['presupuesto'])) {
+        $data['presupuesto'] = str_replace('.', '', $data['presupuesto']);
+        $data['presupuesto'] = str_replace(',', '.', $data['presupuesto']);
     }
 
+    // Tomar entidad desde el programa
+    $programa = Programa::select('id', 'entidad_id')->findOrFail($data['programa_id']);
+
+    if (!$programa->entidad_id) {
+        return back()->withInput()->withErrors([
+            'programa_id' => 'El programa seleccionado no tiene una entidad asignada.'
+        ]);
+    }
+
+    $data['entidad_id'] = $programa->entidad_id;
+
+    Proyecto::create($data);
+
+    return redirect()
+        ->route('proyectos.index')
+        ->with('success', 'Proyecto creado correctamente.');
+    }
     /**
      * Muestra un proyecto.
      */
@@ -86,11 +102,30 @@ class ProyectoController extends Controller
      */
     public function update(UpdateProyectoRequest $request, Proyecto $proyecto)
     {
-        $proyecto->update($request->validated());
+    $data = $request->validated();
 
-        return redirect()
-            ->route('proyectos.index')
-            ->with('success', 'Proyecto actualizado correctamente.');
+    if (isset($data['presupuesto'])) {
+        $data['presupuesto'] = str_replace('.', '', $data['presupuesto']);
+        $data['presupuesto'] = str_replace(',', '.', $data['presupuesto']);
+    }
+
+    if (isset($data['programa_id'])) {
+        $programa = Programa::select('id', 'entidad_id')->findOrFail($data['programa_id']);
+
+        if (!$programa->entidad_id) {
+            return back()->withInput()->withErrors([
+                'programa_id' => 'El programa seleccionado no tiene una entidad asignada.'
+            ]);
+        }
+
+        $data['entidad_id'] = $programa->entidad_id;
+    }
+
+    $proyecto->update($data);
+
+    return redirect()
+        ->route('proyectos.index')
+        ->with('success', 'Proyecto actualizado correctamente.');
     }
 
     /**
@@ -109,17 +144,16 @@ class ProyectoController extends Controller
      * Aprueba un proyecto.
      * La autorización por rol se controla en routes/web.php con middleware('role:...').
      */
-        public function aprobar(Proyecto $proyecto)
+    public function aprobar(Proyecto $proyecto)
     {
-    DB::transaction(function () use ($proyecto) {
-        $proyecto->update([
-            'aprobado'     => true,
-            'aprobado_por' => auth()->id(),
-            'aprobado_en'  => now(),
-        ]);
-    });
+        DB::transaction(function () use ($proyecto) {
+            $proyecto->update([
+                'aprobado'     => true,
+                'aprobado_por' => auth()->id(),
+                'aprobado_en'  => now(),
+            ]);
+        });
 
-    return back()->with('success', 'Proyecto aprobado correctamente.');
+        return back()->with('success', 'Proyecto aprobado correctamente.');
     }
-
 }

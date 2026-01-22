@@ -18,6 +18,7 @@ class Proyecto extends Model
         'fecha_inicio',
         'fecha_fin',
         'programa_id',
+        'entidad_id',
         'estado',
         'presupuesto',
     ];

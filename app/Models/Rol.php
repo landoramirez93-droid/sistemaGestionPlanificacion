@@ -6,12 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Rol extends Model
 {
-protected $table = 'roles';
+    protected $table = 'roles';
 
-protected $fillable = ['nombre', 'descripcion'];
+    protected $fillable = ['nombre', 'descripcion'];
 
-public function users()
-{
-return $this->hasMany(User::class, 'rol_id');
-}
+     /**
+     * Relación: un Rol tiene muchos usuarios.
+     * - hasMany indica que varios registros de users apuntan a este rol.
+     * - 'rol_id' es la llave foránea en la tabla users que referencia a roles.id
+     */
+    public function users()
+    {
+    return $this->hasMany(User::class, 'rol_id');
+    }
 }

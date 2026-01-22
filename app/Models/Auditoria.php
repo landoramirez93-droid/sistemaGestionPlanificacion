@@ -11,7 +11,7 @@ class Auditoria extends Model
     use HasFactory;
 
     protected $table = 'auditorias';
-
+    // Define explícitamente el nombre de la tabla en la base de datos.
     protected $fillable = [
         'user_id',
         'entidad_id',
@@ -41,8 +41,14 @@ class Auditoria extends Model
         return $this->belongsTo(User::class);
     }
 
+    // Relación de auditoría pertenece a un usuario.
+    // Permite: $auditoria->user y eager loading con with('user').
+
     public function entidad()
     {
         return $this->belongsTo(Entidad::class);
     }
+    // Relación de auditoría pertenece a una entidad.
+    // Permite: $auditoria->entidad y eager loading con with('entidad').
+    
 }

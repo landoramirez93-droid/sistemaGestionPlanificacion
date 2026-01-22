@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 trait RegistraAuditoria
 {
     /**
-     * Campos que NO deben registrarse en antes/despues.
+     * Campos sensibles que nunca deben persistirse en auditoría.
      */
     protected array $auditExclude = [
         'password',
@@ -18,7 +18,7 @@ trait RegistraAuditoria
     ];
 
     /**
-     * Campos que normalmente se ignoran (ruido).
+     * Campos “ruido” que no aportan al antes/después.
      */
     protected array $auditIgnore = [
         'updated_at',
@@ -31,35 +31,49 @@ trait RegistraAuditoria
      */
     protected array $auditOld = [];
 
+    /**
+     * Hook automático cuando el trait se usa en un Modelo Eloquent.
+     */
     public static function bootRegistraAuditoria(): void
     {
         static::created(function (Model $model) {
-            $model->writeAudit('CREAR', null, $model->getAttributes(), 'Registro creado');
+            $model->writeAudit(
+                accion: 'CREAR',
+                antes: null,
+                despues: $model->getAttributes(),
+                descripcion: $model->auditDescripcion('CREAR', null, $model->getAttributes())
+                    ?? 'Registro creado'
+            );
         });
 
         static::updating(function (Model $model) {
             $dirtyKeys = array_keys($model->getDirty());
-            $dirtyKeys = array_diff($dirtyKeys, $model->auditIgnore ?? []);
+            $dirtyKeys = array_values(array_diff($dirtyKeys, $model->getAuditIgnore()));
 
-            // Si solo cambian timestamps u otros campos ignorados, no auditar
+            // Si solo cambian campos ignorados, no auditar
             if (empty($dirtyKeys)) {
                 $model->auditOld = [];
                 return;
             }
 
-            $old = array_intersect_key($model->getOriginal(), array_flip($dirtyKeys));
-            $model->auditOld = $old;
+            $model->auditOld = array_intersect_key(
+                $model->getOriginal(),
+                array_flip($dirtyKeys)
+            );
         });
 
         static::updated(function (Model $model) {
             $new = $model->getChanges();
-            $new = array_diff_key($new, array_flip($model->auditIgnore ?? []));
+            $new = array_diff_key($new, array_flip($model->getAuditIgnore()));
 
             if (empty($new)) {
                 return;
             }
 
-            $model->writeAudit('ACTUALIZAR', $model->auditOld ?? null, $new, 'Registro actualizado');
+            $descripcion = $model->auditDescripcion('ACTUALIZAR', $model->auditOld ?? null, $new)
+                ?? 'Registro actualizado';
+
+            $model->writeAudit('ACTUALIZAR', $model->auditOld ?? null, $new, $descripcion);
         });
 
         static::deleting(function (Model $model) {
@@ -67,8 +81,41 @@ trait RegistraAuditoria
         });
 
         static::deleted(function (Model $model) {
-            $model->writeAudit('ELIMINAR', $model->auditOld ?? null, null, 'Registro eliminado');
+            $descripcion = $model->auditDescripcion('ELIMINAR', $model->auditOld ?? null, null)
+                ?? 'Registro eliminado';
+
+            $model->writeAudit('ELIMINAR', $model->auditOld ?? null, null, $descripcion);
         });
+    }
+
+    /**
+     * Punto de extensión: personaliza el módulo (por defecto, nombre de clase).
+     */
+    protected function auditModulo(): string
+    {
+        return class_basename($this);
+    }
+
+    /**
+     * Punto de extensión: personaliza la descripción por acción.
+     * Retorna null para usar descripciones por defecto.
+     */
+    protected function auditDescripcion(string $accion, ?array $antes, ?array $despues): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Permite a modelos sobrescribir estos campos si lo requieren.
+     */
+    protected function getAuditExclude(): array
+    {
+        return $this->auditExclude ?? [];
+    }
+
+    protected function getAuditIgnore(): array
+    {
+        return $this->auditIgnore ?? [];
     }
 
     protected function writeAudit(string $accion, ?array $antes, ?array $despues, ?string $descripcion = null): void
@@ -81,7 +128,7 @@ trait RegistraAuditoria
         $payload = [
             'user_id'     => $user?->id,
             'entidad_id'  => $this->resolveEntidadId($user),
-            'modulo'      => $this->resolveModuloName(),
+            'modulo'      => $this->auditModulo(),
             'accion'      => $accion,
             'tabla'       => $this->getTable(),
             'registro_id' => $this->getKey(),
@@ -94,7 +141,7 @@ trait RegistraAuditoria
             'user_agent'  => app()->runningInConsole() ? null : request()->userAgent(),
         ];
 
-        // Evita auditoría “fantasma” si hay transacciones que se revierten
+        // Evita auditoría “fantasma” si la transacción se revierte
         DB::afterCommit(function () use ($payload) {
             Auditoria::create($payload);
         });
@@ -102,26 +149,28 @@ trait RegistraAuditoria
 
     protected function filterAuditValues(?array $values): ?array
     {
-        if ($values === null) return null;
+        if ($values === null) {
+            return null;
+        }
 
-        foreach (($this->auditExclude ?? []) as $field) {
+        // Quita ruido
+        foreach ($this->getAuditIgnore() as $field) {
+            unset($values[$field]);
+        }
+
+        // Quita sensibles
+        foreach ($this->getAuditExclude() as $field) {
             unset($values[$field]);
         }
 
         return $values;
     }
 
-    protected function resolveModuloName(): string
-    {
-        // Puedes personalizar esto si quieres nombres más “humanos”
-        return class_basename($this);
-    }
-
     protected function resolveEntidadId($user): ?int
     {
         // 1) Si el modelo tiene entidad_id, úsalo
-        if (isset($this->attributes['entidad_id'])) {
-            return (int) $this->attributes['entidad_id'];
+        if (array_key_exists('entidad_id', $this->attributes ?? [])) {
+            return $this->attributes['entidad_id'] !== null ? (int) $this->attributes['entidad_id'] : null;
         }
 
         // 2) Si el usuario tiene entidad_id, úsalo

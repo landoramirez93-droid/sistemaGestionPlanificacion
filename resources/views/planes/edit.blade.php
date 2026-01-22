@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title','Editar Plan')
+@include('planes.partials._form', ['plan' => $plan])
 
 @section('content')
 <h4 class="mb-3">Editar Plan: <span class="text-primary">{{ $plan->nombre }}</span></h4>

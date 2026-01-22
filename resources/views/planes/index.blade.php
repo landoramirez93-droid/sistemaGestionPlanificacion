@@ -30,6 +30,9 @@
                     <th>ID</th>
                     <th>Código</th>
                     <th>Nombre</th>
+                    <th>Objetivo (ODS)</th>
+                    <th>Metas ODS</th>
+                    <th>Detalle</th>
                     <th>Periodo</th>
                     <th>Versión</th>
                     <th>Estado</th>
@@ -42,9 +45,44 @@
                     <td>{{ $plan->id }}</td>
                     <td>{{ $plan->codigo }}</td>
                     <td class="fw-semibold">{{ $plan->nombre }}</td>
+
+                    {{-- Objetivo ODS (FK) --}}
+                    <td>
+                        @if($plan->odsMetaObjetivo)
+                        <span class="badge bg-primary">
+                            {{ $plan->odsMetaObjetivo->codigo ?? 'Meta' }} -
+                            {{ \Illuminate\Support\Str::limit($plan->odsMetaObjetivo->descripcion ?? '', 60) }}
+                        </span>
+                        @else
+                        <span class="text-muted">No definido</span>
+                        @endif
+                    </td>
+
+                    {{-- Metas ODS (many-to-many) --}}
+                    <td style="min-width: 220px;">
+                        @forelse($plan->odsMetas as $meta)
+                        <div class="mb-1">
+                            <span class="badge bg-secondary">
+                                {{ $meta->codigo ?? 'Meta' }} -
+                                {{ \Illuminate\Support\Str::limit($meta->descripcion ?? '', 50) }}
+                            </span>
+                        </div>
+                        @empty
+                        <span class="text-muted">No definidas</span>
+                        @endforelse
+                    </td>
+
+                    {{-- Detalle --}}
+                    <td style="min-width: 220px;">
+                        {{ \Illuminate\Support\Str::limit($plan->descripcion ?? '', 120) }}
+                    </td>
+
+                    {{-- Periodo --}}
                     <td>{{ $plan->fecha_inicio?->format('Y-m-d') }} → {{ $plan->fecha_fin?->format('Y-m-d') }}</td>
+
                     <td>{{ $plan->version }}</td>
                     <td>{{ $plan->estado }}</td>
+
                     <td class="text-end">
                         <a href="{{ route('planes.edit', $plan) }}" class="btn btn-sm btn-outline-primary">Editar</a>
 
@@ -60,10 +98,11 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center text-muted py-4">No hay planes registrados.</td>
+                    <td colspan="10" class="text-center text-muted py-4">No hay planes registrados.</td>
                 </tr>
                 @endforelse
             </tbody>
+
         </table>
     </div>
 </div>

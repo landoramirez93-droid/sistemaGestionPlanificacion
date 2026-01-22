@@ -5,23 +5,30 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Detalle Meta ODS</h4>
     <div class="d-flex gap-2">
-        <a class="btn btn-outline-primary" href="{{ route('ods.metas.edit',$meta) }}">Editar</a>
+        <a class="btn btn-primary" href="{{ route('ods.metas.edit', $ods_meta) }}">Editar</a>
         <a class="btn btn-secondary" href="{{ route('ods.metas.index') }}">Volver</a>
     </div>
 </div>
 
 <div class="card p-3 shadow-sm">
-    <div><b>ID:</b> {{ $meta->id }}</div>
-    <div><b>Código:</b> {{ $meta->codigo ?? '-' }}</div>
-    <div><b>Año:</b> {{ $meta->anio_referencia ?? '-' }}</div>
-    <div><b>Estado:</b> {{ $meta->estado }}</div>
-    <hr>
-    <div><b>Descripción:</b><br>{{ $meta->descripcion }}</div>
+    <div><b>N°:</b> {{ $ods_meta->numero }}</div>
+    <div><b>Objetivo:</b> {{ $ods_meta->objetivo }}</div>
+    <div><b>Presupuesto:</b> {{ $ods_meta->presupuesto ? number_format($ods_meta->presupuesto, 0, ',', '.') : '-' }}
+    </div>
 
     <hr>
+
+    <div><b>Meta:</b><br>{{ $ods_meta->meta }}</div>
+
+    <hr>
+
+    <div><b>Observación:</b><br>{{ $ods_meta->observacion ?? '-' }}</div>
+
+    <hr>
+
     <h6>Objetivos vinculados</h6>
     <ul class="mb-0">
-        @forelse($meta->objetivos as $o)
+        @forelse($ods_meta->objetivos as $o)
         <li>#{{ $o->id }} - {{ $o->descripcion }}</li>
         @empty
         <li class="text-muted">Sin objetivos vinculados.</li>
@@ -29,9 +36,10 @@
     </ul>
 
     <hr>
+
     <h6>Planes vinculados</h6>
     <ul class="mb-0">
-        @forelse($meta->planes as $p)
+        @forelse($ods_meta->planes as $p)
         <li>#{{ $p->id }} - {{ $p->nombre }}</li>
         @empty
         <li class="text-muted">Sin planes vinculados.</li>

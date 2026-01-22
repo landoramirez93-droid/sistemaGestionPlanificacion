@@ -96,25 +96,27 @@ Route::middleware('auth')->group(function () {
     | Tu controller NO tiene show(), así que dejo solo index en lectura.
     | Si luego creas show(), puedes agregarlo.
     */
-    Route::resource('objetivos-estrategicos', ObjetivoEstrategicoController::class)
-        ->only(['index'])
-        ->names('objetivos')
-        ->parameters(['objetivos-estrategicos' => 'objetivo'])
-        ->middleware('role:Administrador,TI,Técnico de Planificación,Revisor Institucional,Validador (SNP / Ente Rector),Auditor');
 
     Route::resource('objetivos-estrategicos', ObjetivoEstrategicoController::class)
         ->except(['index', 'show'])
         ->names('objetivos')
         ->parameters(['objetivos-estrategicos' => 'objetivo'])
         ->middleware('role:Administrador,TI');
+     
+    Route::resource('objetivos-estrategicos', ObjetivoEstrategicoController::class)
+        ->only(['index'])
+        ->names('objetivos')
+        ->parameters(['objetivos-estrategicos' => 'objetivo'])
+        ->middleware('role:Administrador,TI,Técnico de Planificación,Revisor Institucional,Validador (SNP / Ente Rector),Auditor');
 
     // Rutas extra de upload (si las estás usando)
-    Route::get('objetivos-estrategicos/upload', [ObjetivoEstrategicoController::class, 'uploadForm'])
-        ->name('objetivos.uploadForm')
-        ->middleware('role:Administrador,TI');
 
     Route::post('objetivos-estrategicos/upload', [ObjetivoEstrategicoController::class, 'upload'])
         ->name('objetivos.upload')
+        ->middleware('role:Administrador,TI');
+
+    Route::get('objetivos-estrategicos/upload', [ObjetivoEstrategicoController::class, 'uploadForm'])
+        ->name('objetivos.uploadForm')
         ->middleware('role:Administrador,TI');
 
     /*
@@ -124,45 +126,48 @@ Route::middleware('auth')->group(function () {
     | Tu controller NO tiene show(), así que dejo solo index en lectura.
     | Importante: el parámetro debe ser {plan} (no {plane}).
     */
-    Route::resource('planes', PlanController::class)
-        ->only(['index'])
-        ->parameters(['planes' => 'plan'])
-        ->middleware('role:Administrador,TI,Técnico de Planificación,Revisor Institucional,Validador (SNP / Ente Rector),Auditor');
 
     Route::resource('planes', PlanController::class)
         ->except(['index', 'show'])
         ->parameters(['planes' => 'plan'])
         ->middleware('role:Administrador,TI');
+        
+    Route::resource('planes', PlanController::class)
+        ->only(['index'])
+        ->parameters(['planes' => 'plan'])
+        ->middleware('role:Administrador,TI,Técnico de Planificación,Revisor Institucional,Validador (SNP / Ente Rector),Auditor');
 
     /*
     |--------------------------------------------------------------------------
     | PROGRAMAS (VER vs CRUD)
     |--------------------------------------------------------------------------
     */
-    Route::resource('programas', ProgramaController::class)
-        ->only(['index', 'show'])
-        ->parameters(['programas' => 'programa'])
-        ->middleware('role:Administrador,TI,Técnico de Planificación,Revisor Institucional,Validador (SNP / Ente Rector),Auditor');
 
     Route::resource('programas', ProgramaController::class)
         ->except(['index', 'show'])
         ->parameters(['programas' => 'programa'])
         ->middleware('role:Administrador,TI');
+        
+    Route::resource('programas', ProgramaController::class)
+        ->only(['index', 'show'])
+        ->parameters(['programas' => 'programa'])
+        ->middleware('role:Administrador,TI,Técnico de Planificación,Revisor Institucional,Validador (SNP / Ente Rector),Auditor');
 
     /*
     |--------------------------------------------------------------------------
     | PROYECTOS (VER vs CRUD + flujo)
     |--------------------------------------------------------------------------
     */
-    Route::resource('proyectos', ProyectoController::class)
-        ->only(['index', 'show'])
-        ->parameters(['proyectos' => 'proyecto'])
-        ->middleware('role:Administrador,TI,Técnico de Planificación,Revisor Institucional,Validador (SNP / Ente Rector),Auditor');
 
     Route::resource('proyectos', ProyectoController::class)
         ->except(['index', 'show'])
         ->parameters(['proyectos' => 'proyecto'])
         ->middleware('role:Administrador,TI');
+        
+    Route::resource('proyectos', ProyectoController::class)
+        ->only(['index', 'show'])
+        ->parameters(['proyectos' => 'proyecto'])
+        ->middleware('role:Administrador,TI,Técnico de Planificación,Revisor Institucional,Validador (SNP / Ente Rector),Auditor');
 
     Route::post('proyectos/{proyecto}/aprobar', [ProyectoController::class, 'aprobar'])
         ->name('proyectos.aprobar')

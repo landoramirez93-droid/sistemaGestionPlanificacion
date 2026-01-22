@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Unit;
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,10 +12,15 @@ class EntidadTest extends TestCase
 
     public function test_crea_entidad(): void
     {
-        $entidad = Entidad::factory()->create();
+        $entidad = Entidad::create([
+            'nombre' => 'Entidad demo',
+            'sigla'  => 'EDMO', // 👈 OBLIGATORIO
+        ]);
 
         $this->assertDatabaseHas('entidades', [
-            'id' => $entidad->id,
+            'id'     => $entidad->id,
+            'nombre' => 'Entidad demo',
+            'sigla'  => 'EDMO',
         ]);
     }
 }

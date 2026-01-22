@@ -41,10 +41,9 @@
         <table class="table table-striped align-middle mb-0">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Código</th>
-                    <th>Descripción</th>
-                    <th>Año</th>
+                    <th>N°</th>
+                    <th>Objetivo</th>
+                    <th>Presupuesto</th>
                     <th>Estado</th>
                     <th class="text-end">Acciones</th>
                 </tr>
@@ -52,22 +51,23 @@
             <tbody>
                 @forelse($metas as $meta)
                 <tr>
-                    <td>{{ $meta->id }}</td>
-                    <td>{{ $meta->codigo ?? '-' }}</td>
-                    <td class="fw-semibold">{{ \Illuminate\Support\Str::limit($meta->descripcion, 80) }}</td>
-                    <td>{{ $meta->anio_referencia ?? '-' }}</td>
-                    <td>{{ $meta->estado }}</td>
-                    <td class="text-end">
-                        <a class="btn btn-sm btn-outline-secondary" href="{{ route('ods.metas.show',$meta) }}">Ver</a>
-                        <a class="btn btn-sm btn-outline-primary" href="{{ route('ods.metas.edit',$meta) }}">Editar</a>
-                        <form class="d-inline" method="POST" action="{{ route('ods.metas.destroy',$meta) }}">
-                            @csrf @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger"
-                                onclick="return confirm('¿Eliminar esta meta ODS?')">
-                                Eliminar
-                            </button>
-                        </form>
-                    </td>
+                    <<td>{{ $meta->numero }}</td>
+                        <td class="fw-semibold">{{ \Illuminate\Support\Str::limit($meta->objetivo, 80) }}</td>
+                        <td>{{ $meta->presupuesto ? number_format($meta->presupuesto, 0, ',', '.') : '-' }}</td>
+                        <td>{{ $meta->estado }}</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary"
+                                href="{{ route('ods.metas.show',$meta) }}">Ver</a>
+                            <a class="btn btn-sm btn-outline-primary"
+                                href="{{ route('ods.metas.edit',$meta) }}">Editar</a>
+                            <form class="d-inline" method="POST" action="{{ route('ods.metas.destroy',$meta) }}">
+                                @csrf @method('DELETE')
+                                <button class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('¿Eliminar esta meta ODS?')">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </td>
                 </tr>
                 @empty
                 <tr>

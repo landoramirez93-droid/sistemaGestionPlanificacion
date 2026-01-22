@@ -52,7 +52,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Nombre</th>
+                        <th>Programa</th>
                         <th>Periodo</th>
                         <th>Estado</th>
                         <th>Responsable</th>

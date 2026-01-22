@@ -38,7 +38,6 @@
                     <thead class="table-light">
                         <tr>
                             <th style="width: 70px;">ID</th>
-                            <th>Código</th>
                             <th>Nombre</th>
                             <th>Sigla</th>
                             <th>Tipo</th>
@@ -52,7 +51,6 @@
                         @forelse($entidades as $entidad)
                         <tr>
                             <td class="fw-semibold">{{ $entidad->id }}</td>
-                            <td>{{ $entidad->codigo }}</td>
                             <td>{{ $entidad->nombre }}</td>
                             <td><span class="badge text-bg-secondary">{{ $entidad->sigla }}</span></td>
                             <td>{{ $entidad->tipo }}</td>

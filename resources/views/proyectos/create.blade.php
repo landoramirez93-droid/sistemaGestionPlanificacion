@@ -22,7 +22,7 @@
                     </div>
 
                     <div class="col-md-9">
-                        <label class="form-label">Nombre</label>
+                        <label class="form-label">Nombre del Proyecto</label>
                         <input class="form-control" name="nombre" value="{{ old('nombre') }}" required>
                     </div>
 

@@ -70,22 +70,22 @@
                     </li>
                     @endif
 
-                    @if(\Illuminate\Support\Facades\Route::has('proyectos.index'))
-                    <li class="nav-item">
-                        <a href="{{ route('proyectos.index') }}"
-                            class="nav-link sidebar-link {{ request()->routeIs('proyectos.*') ? 'active' : '' }}">
-                            <span class="me-2">🧩</span>
-                            <span>Proyectos</span>
-                        </a>
-                    </li>
-                    @endif
-
                     @if(\Illuminate\Support\Facades\Route::has('programas.index'))
                     <li class="nav-item">
                         <a href="{{ route('programas.index') }}"
                             class="nav-link sidebar-link {{ request()->routeIs('programas.*') ? 'active' : '' }}">
                             <span class="me-2">📌</span>
                             <span>Programas</span>
+                        </a>
+                    </li>
+                    @endif
+
+                    @if(\Illuminate\Support\Facades\Route::has('proyectos.index'))
+                    <li class="nav-item">
+                        <a href="{{ route('proyectos.index') }}"
+                            class="nav-link sidebar-link {{ request()->routeIs('proyectos.*') ? 'active' : '' }}">
+                            <span class="me-2">🧩</span>
+                            <span>Proyectos</span>
                         </a>
                     </li>
                     @endif

@@ -3,79 +3,119 @@
 namespace App\Http\Controllers;
 
 use App\Models\Plan;
+use App\Models\OdsMeta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PlanController extends Controller
 {
+    /**
+     * Listado paginado de planes.
+     */
     public function index()
     {
         $planes = Plan::query()
+            ->with(['odsMetas', 'odsMetaObjetivo'])
             ->latest()
             ->paginate(10);
 
         return view('planes.index', compact('planes'));
     }
 
+    /**
+     * Muestra el formulario de creación.
+     */
     public function create()
     {
-        return view('planes.create');
+        $odsMetas = OdsMeta::query()
+            ->orderBy('ods_numero')
+            ->orderBy('numero')
+            ->get();
+
+        return view('planes.create', compact('odsMetas'));
     }
 
+    /**
+     * Guarda un plan y (opcionalmente) sus hijos: metas, indicadores y cronogramas.
+     */
     public function store(Request $request)
     {
         $data = $this->validatePlan($request);
 
         return DB::transaction(function () use ($data) {
 
-            // Control de duplicados (además del unique en BD, si lo tienes)
-            $exists = Plan::where('nombre', $data['nombre'])
+            // Control de duplicados (regla de negocio adicional a unique en BD si existe)
+            $exists = Plan::query()
+                ->where('nombre', $data['nombre'])
                 ->where('fecha_inicio', $data['fecha_inicio'])
                 ->where('fecha_fin', $data['fecha_fin'])
                 ->where('version', $data['version'] ?? 1)
                 ->exists();
 
             if ($exists) {
-                return back()->withErrors([
-                    'nombre' => 'Ya existe un plan con el mismo nombre, periodo y versión.'
-                ])->withInput();
+                return back()
+                    ->withErrors(['nombre' => 'Ya existe un plan con el mismo nombre, periodo y versión.'])
+                    ->withInput();
             }
 
             $plan = Plan::create([
-                'codigo' => $data['codigo'] ?? null,
-                'nombre' => $data['nombre'],
-                'descripcion' => $data['descripcion'] ?? null,
-                'fecha_inicio' => $data['fecha_inicio'],
-                'fecha_fin' => $data['fecha_fin'],
-                'version' => $data['version'] ?? 1,
-                'estado' => $data['estado'] ?? 'BORRADOR',
-                'entidad_id' => $data['entidad_id'] ?? null,
-                'responsable_id' => $data['responsable_id'] ?? null,
-                'created_by' => auth()->id(),
-                'updated_by' => auth()->id(),
+                'codigo'               => $data['codigo'] ?? null,
+                'nombre'               => $data['nombre'],
+                'descripcion'          => $data['descripcion'] ?? null,
+                'fecha_inicio'         => $data['fecha_inicio'],
+                'fecha_fin'            => $data['fecha_fin'],
+                'version'              => $data['version'] ?? 1,
+                'estado'               => $data['estado'] ?? 'BORRADOR',
+
+                // ODS objetivo: ESCALAR (int), no array de reglas
+                'ods_meta_objetivo_id' => (int) $data['ods_meta_objetivo_id'],
+
+                'entidad_id'           => $data['entidad_id'] ?? null,
+                'responsable_id'       => $data['responsable_id'] ?? null,
+                'created_by'           => auth()->id(),
+                'updated_by'           => auth()->id(),
             ]);
 
-            // Hijos (si llegaron)
+            // Metas ODS múltiples (pivot)
+            $plan->odsMetas()->sync($data['ods_meta_ids'] ?? []);
+
+            // Hijos (si llegaron): limpiar filas vacías y exigir un campo clave
             if (!empty($data['metas'])) {
                 $plan->metas()->createMany($this->cleanChildren($data['metas'], ['nombre']));
             }
+
             if (!empty($data['indicadores'])) {
                 $plan->indicadores()->createMany($this->cleanChildren($data['indicadores'], ['nombre']));
             }
+
             if (!empty($data['cronogramas'])) {
                 $plan->cronogramas()->createMany($this->cleanChildren($data['cronogramas'], ['actividad']));
             }
 
-            return redirect()->route('planes.index')->with('success', 'Plan creado correctamente.');
+            return redirect()
+                ->route('planes.index')
+                ->with('success', 'Plan creado correctamente.');
         });
     }
 
+    /**
+     * Muestra el formulario de edición.
+     */
     public function edit(Plan $plan)
     {
-        $plan->load(['metas', 'indicadores', 'cronogramas']);
-        return view('planes.edit', compact('plan'));
+        $plan->load(['metas', 'indicadores', 'cronogramas', 'odsMetas', 'odsMetaObjetivo']);
+
+        $odsMetas = OdsMeta::query()
+            ->orderBy('ods_numero')
+            ->orderBy('numero')
+            ->get();
+
+        return view('planes.edit', compact('plan', 'odsMetas'));
     }
 
+    /**
+     * Actualiza un plan y (V1) sincroniza hijos borrando y recreando.
+     */
     public function update(Request $request, Plan $plan)
     {
         $data = $this->validatePlan($request, $plan->id);
@@ -83,7 +123,8 @@ class PlanController extends Controller
         return DB::transaction(function () use ($data, $plan) {
 
             // Duplicados (excluyendo el actual)
-            $exists = Plan::where('id', '!=', $plan->id)
+            $exists = Plan::query()
+                ->where('id', '!=', $plan->id)
                 ->where('nombre', $data['nombre'])
                 ->where('fecha_inicio', $data['fecha_inicio'])
                 ->where('fecha_fin', $data['fecha_fin'])
@@ -91,23 +132,29 @@ class PlanController extends Controller
                 ->exists();
 
             if ($exists) {
-                return back()->withErrors([
-                    'nombre' => 'Ya existe otro plan con el mismo nombre, periodo y versión.'
-                ])->withInput();
+                return back()
+                    ->withErrors(['nombre' => 'Ya existe otro plan con el mismo nombre, periodo y versión.'])
+                    ->withInput();
             }
 
             $plan->update([
-                'codigo' => $data['codigo'] ?? null,
-                'nombre' => $data['nombre'],
-                'descripcion' => $data['descripcion'] ?? null,
-                'fecha_inicio' => $data['fecha_inicio'],
-                'fecha_fin' => $data['fecha_fin'],
-                'version' => $data['version'] ?? $plan->version,
-                'estado' => $data['estado'] ?? $plan->estado,
-                'entidad_id' => $data['entidad_id'] ?? null,
-                'responsable_id' => $data['responsable_id'] ?? null,
-                'updated_by' => auth()->id(),
+                'codigo'               => $data['codigo'] ?? null,
+                'nombre'               => $data['nombre'],
+                'descripcion'          => $data['descripcion'] ?? null,
+                'fecha_inicio'         => $data['fecha_inicio'],
+                'fecha_fin'            => $data['fecha_fin'],
+                'version'              => $data['version'] ?? $plan->version,
+                'estado'               => $data['estado'] ?? $plan->estado,
+
+                'ods_meta_objetivo_id' => (int) $data['ods_meta_objetivo_id'],
+
+                'entidad_id'           => $data['entidad_id'] ?? null,
+                'responsable_id'       => $data['responsable_id'] ?? null,
+                'updated_by'           => auth()->id(),
             ]);
+
+            // Sync ODS metas (pivot)
+            $plan->odsMetas()->sync($data['ods_meta_ids'] ?? []);
 
             // Sync simple V1: borrar hijos y recrear
             $plan->metas()->delete();
@@ -117,44 +164,62 @@ class PlanController extends Controller
             if (!empty($data['metas'])) {
                 $plan->metas()->createMany($this->cleanChildren($data['metas'], ['nombre']));
             }
+
             if (!empty($data['indicadores'])) {
                 $plan->indicadores()->createMany($this->cleanChildren($data['indicadores'], ['nombre']));
             }
+
             if (!empty($data['cronogramas'])) {
                 $plan->cronogramas()->createMany($this->cleanChildren($data['cronogramas'], ['actividad']));
             }
 
-            return redirect()->route('planes.index')->with('success', 'Plan actualizado correctamente.');
+            return redirect()
+                ->route('planes.index')
+                ->with('success', 'Plan actualizado correctamente.');
         });
     }
 
+    /**
+     * Elimina un plan (SoftDeletes).
+     */
     public function destroy(Plan $plan)
     {
         $plan->delete();
 
-        return redirect()->route('planes.index')->with('success', 'Plan eliminado (soft delete).');
+        return redirect()
+            ->route('planes.index')
+            ->with('success', 'Plan eliminado (soft delete).');
     }
 
     /**
-     * Validación centralizada
+     * Validación centralizada.
      */
     private function validatePlan(Request $request, ?int $planId = null): array
     {
         return $request->validate([
-            'codigo' => ['nullable', 'string', 'max:50'],
-            'nombre' => ['required', 'string', 'max:255'],
-            'descripcion' => ['nullable', 'string'],
+            // Campos principales
+            'codigo'       => ['nullable', 'string', 'max:50'],
+            'nombre'       => ['required', 'string', 'max:255'],
+            'descripcion'  => ['nullable', 'string'],
 
+            // Fechas
             'fecha_inicio' => ['required', 'date'],
-            'fecha_fin' => ['required', 'date', 'after_or_equal:fecha_inicio'],
+            'fecha_fin'    => ['required', 'date', 'after_or_equal:fecha_inicio'],
 
-            'version' => ['nullable', 'integer', 'min:1'],
-            'estado' => ['required', 'in:BORRADOR,EN_REVISION,APROBADO,INACTIVO'],
+            // Versionado y estado
+            'version'      => ['nullable', 'integer', 'min:1'],
+            'estado'       => ['required', 'in:BORRADOR,EN_REVISION,APROBADO,INACTIVO'],
 
-            'entidad_id' => ['nullable', 'integer'],
+            // Relaciones simples (puedes mejorar con exists si tienes tablas)
+            'entidad_id'     => ['nullable', 'integer'],
             'responsable_id' => ['nullable', 'integer'],
 
-            // Metas
+            // ODS (exacto como pediste)
+            'ods_meta_objetivo_id' => ['required', 'integer', 'exists:ods_metas,id'],
+            'ods_meta_ids'         => ['nullable', 'array'],
+            'ods_meta_ids.*'       => ['integer', 'exists:ods_metas,id'],
+
+            // Hijos: metas
             'metas' => ['nullable', 'array'],
             'metas.*.nombre' => ['nullable', 'string', 'max:255'],
             'metas.*.descripcion' => ['nullable', 'string'],
@@ -164,7 +229,7 @@ class PlanController extends Controller
             'metas.*.fecha_inicio' => ['nullable', 'date'],
             'metas.*.fecha_fin' => ['nullable', 'date'],
 
-            // Indicadores
+            // Hijos: indicadores
             'indicadores' => ['nullable', 'array'],
             'indicadores.*.nombre' => ['nullable', 'string', 'max:255'],
             'indicadores.*.descripcion' => ['nullable', 'string'],
@@ -175,7 +240,7 @@ class PlanController extends Controller
             'indicadores.*.fuente' => ['nullable', 'string', 'max:255'],
             'indicadores.*.estado' => ['nullable', 'in:ACTIVO,INACTIVO'],
 
-            // Cronogramas
+            // Hijos: cronogramas
             'cronogramas' => ['nullable', 'array'],
             'cronogramas.*.actividad' => ['nullable', 'string', 'max:255'],
             'cronogramas.*.detalle' => ['nullable', 'string'],
@@ -190,7 +255,7 @@ class PlanController extends Controller
     }
 
     /**
-     * Quita filas vacías y exige campos clave
+     * Limpieza de filas hijas.
      */
     private function cleanChildren(array $rows, array $requiredKeys): array
     {

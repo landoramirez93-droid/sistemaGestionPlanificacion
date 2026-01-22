@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ObjetivoEstrategico;
 use App\Models\Entidad;
+use App\Models\ObjetivoEstrategico;
+use App\Models\OdsMeta;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ObjetivoEstrategicoController extends Controller
 {
@@ -13,14 +15,14 @@ class ObjetivoEstrategicoController extends Controller
      */
     public function index()
     {
-        $objetivos = ObjetivoEstrategico::with('entidad')->get();
+        $objetivos = ObjetivoEstrategico::with([
+                'entidadResponsable',
+                'odsMetas',
+            ])
+            ->latest()
+            ->paginate(10);
 
         return view('objetivos.index', compact('objetivos'));
-    }
-
-    public function uploadForm()
-    {
-        return view('objetivos.upload');
     }
 
     /**
@@ -28,8 +30,10 @@ class ObjetivoEstrategicoController extends Controller
      */
     public function create()
     {
-        $entidades = Entidad::all();
-        return view('objetivos.create', compact('entidades'));
+        $entidades = Entidad::orderBy('id')->get();
+        $odsMetas  = OdsMeta::orderBy('ods_numero')->orderBy('numero')->get();
+
+        return view('objetivos.create', compact('entidades', 'odsMetas'));
     }
 
     /**
@@ -37,15 +41,21 @@ class ObjetivoEstrategicoController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nombre'            => 'required|string|max:255',
-            'descripcion'       => 'required|string',
-            'linea_estrategica' => 'required|string|max:255',
-            'entidad_id'        => 'required|exists:entidades,id',
-            'estado'            => 'required|boolean',
-        ]);
+        $validated = $this->validateObjetivo($request);
 
-        ObjetivoEstrategico::create($validated);
+        DB::transaction(function () use ($validated) {
+
+            $objetivo = ObjetivoEstrategico::create([
+                'nombre'            => $validated['nombre'],
+                'descripcion'       => $validated['descripcion'],
+                'linea_estrategica' => $validated['linea_estrategica'],
+                'entidad_id'        => $validated['entidad_id'],
+                'estado'            => $validated['estado'],
+            ]);
+
+            // Sync metas ODS (si no viene, usa [])
+            $objetivo->odsMetas()->sync($validated['ods_meta_ids'] ?? []);
+        });
 
         return redirect()
             ->route('objetivos.index')
@@ -57,8 +67,12 @@ class ObjetivoEstrategicoController extends Controller
      */
     public function edit(ObjetivoEstrategico $objetivo)
     {
-        $entidades = Entidad::all();
-        return view('objetivos.edit', compact('objetivo', 'entidades'));
+        $objetivo->load(['odsMetas', 'entidadResponsable']);
+
+        $entidades = Entidad::orderBy('id')->get();
+        $odsMetas  = OdsMeta::orderBy('ods_numero')->orderBy('numero')->get();
+
+        return view('objetivos.edit', compact('objetivo', 'entidades', 'odsMetas'));
     }
 
     /**
@@ -66,33 +80,24 @@ class ObjetivoEstrategicoController extends Controller
      */
     public function update(Request $request, ObjetivoEstrategico $objetivo)
     {
-        $validated = $request->validate([
-            'nombre'            => 'required|string|max:255',
-            'descripcion'       => 'required|string',
-            'linea_estrategica' => 'required|string|max:255',
-            'entidad_id'        => 'required|exists:entidades,id',
-            'estado'            => 'required|boolean',
-        ]);
+        $validated = $this->validateObjetivo($request);
 
-        $objetivo->update($validated);
+        DB::transaction(function () use ($validated, $objetivo) {
+
+            $objetivo->update([
+                'nombre'            => $validated['nombre'],
+                'descripcion'       => $validated['descripcion'],
+                'linea_estrategica' => $validated['linea_estrategica'],
+                'entidad_id'        => $validated['entidad_id'],
+                'estado'            => $validated['estado'],
+            ]);
+
+            $objetivo->odsMetas()->sync($validated['ods_meta_ids'] ?? []);
+        });
 
         return redirect()
             ->route('objetivos.index')
             ->with('success', 'Objetivo estratégico actualizado correctamente.');
-    }
-
-    /**
-     * Cargar objetivos externos (PDF / Excel)
-     */
-    public function upload(Request $request)
-    {
-        $request->validate([
-            'archivo' => 'required|mimes:pdf,xlsx|max:5120'
-        ]);
-
-        $ruta = $request->file('archivo')->store('objetivos');
-
-        return back()->with('success', 'Archivo cargado correctamente.');
     }
 
     /**
@@ -103,5 +108,23 @@ class ObjetivoEstrategicoController extends Controller
         $objetivo->delete();
 
         return back()->with('success', 'Objetivo estratégico eliminado correctamente.');
+    }
+
+    /**
+     * Validación centralizada (store/update)
+     */
+    private function validateObjetivo(Request $request): array
+    {
+        return $request->validate([
+            'nombre'            => ['required', 'string', 'max:255'],
+            'descripcion'       => ['required', 'string'],
+            'linea_estrategica' => ['required', 'string', 'max:255'],
+            'entidad_id'        => ['required', 'exists:entidades,id'],
+            'estado'            => ['required', 'boolean'],
+
+            // Metas ODS seleccionadas (checkbox/multiselect)
+            'ods_meta_ids'      => ['nullable', 'array'],
+            'ods_meta_ids.*'    => ['integer', 'exists:ods_metas,id'],
+        ]);
     }
 }

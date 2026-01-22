@@ -19,7 +19,7 @@
         @csrf
 
         <div class="mb-3">
-            <label class="form-label">Nombre</label>
+            <label class="form-label">Objetivo</label>
             <input type="text" name="nombre" class="form-control" value="{{ old('nombre') }}" required>
         </div>
 
@@ -52,6 +52,30 @@
                 <option value="1" {{ old('estado', '1') == '1' ? 'selected' : '' }}>Activo</option>
                 <option value="0" {{ old('estado') == '0' ? 'selected' : '' }}>Inactivo</option>
             </select>
+        </div>
+
+        {{-- METAS ODS (CORREGIDO) --}}
+        <div class="mb-3">
+            <label class="form-label">Metas ODS que apoya</label>
+
+            <div class="border rounded p-3" style="max-height: 260px; overflow:auto;">
+                @forelse($odsMetas as $meta)
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="ods_meta_ids[]" value="{{ $meta->id }}"
+                        id="meta_{{ $meta->id }}" {{ in_array($meta->id, old('ods_meta_ids', [])) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="meta_{{ $meta->id }}">
+                        <strong>{{ $meta->codigo ?? 'Meta' }}</strong>
+                        — {{ $meta->descripcion ?? '' }}
+                    </label>
+                </div>
+                @empty
+                <span class="text-muted">No existen metas ODS registradas.</span>
+                @endforelse
+            </div>
+
+            <small class="text-muted">
+                Seleccione una o varias metas ODS alineadas a este objetivo estratégico.
+            </small>
         </div>
 
         <button class="btn btn-primary">Guardar</button>
